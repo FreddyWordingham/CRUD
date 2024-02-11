@@ -5,11 +5,11 @@ import fnmatch
 
 from typeguard import typechecked
 
-from . import Storage
+from .storage_interface import StorageInterface
 from pathlib import PurePosixPath
 
 
-class S3Storage(Storage):
+class S3Storage(StorageInterface):
     @typechecked
     def __init__(self, bucket_name: str):
         """

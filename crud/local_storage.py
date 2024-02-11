@@ -4,10 +4,10 @@ import shutil
 
 from typeguard import typechecked
 
-from . import Storage
+from .storage_interface import StorageInterface
 
 
-class LocalStorage(Storage):
+class LocalStorage(StorageInterface):
     @typechecked
     def __init__(self, root: str):
         """

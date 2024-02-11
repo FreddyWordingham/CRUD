@@ -1,12 +1,12 @@
 from typing import Union
 
+from .storage_interface import StorageInterface
 
-from .storage import Storage
 from .local_storage import LocalStorage
 from .s3_storage import S3Storage
 
 
-def init_storage(type: str, **kwargs) -> Union[LocalStorage, S3Storage]:
+def storage(type: str, **kwargs) -> Union[LocalStorage, S3Storage]:
     """
     Factory function to get the specified storage type instance.
 
@@ -30,5 +30,5 @@ def init_storage(type: str, **kwargs) -> Union[LocalStorage, S3Storage]:
 
 
 # Example usage:
-# local_storage = init_storage("local", root="./path/to/local/storage")
-# s3_storage = init_storage("s3", bucket_name="my-bucket-name")
+# local_storage = storage("local", root="./path/to/local/storage")
+# s3_storage = storage("s3", bucket_name="my-bucket-name")

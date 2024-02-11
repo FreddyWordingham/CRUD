@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from crud import init_storage
+from crud import storage
 
 
 if __name__ == "__main__":
@@ -10,23 +10,23 @@ if __name__ == "__main__":
     print(f"Storage path: {storage_path}")
 
     # Create a local storage instance.
-    storage = init_storage("local", root="./output")
-    # local_storage = init_storage("local", root="./path/to/local/storage")
-    # s3_storage = init_storage("s3", bucket_name="my-bucket-name")
+    store = storage("local", root="./output")
+    # local_storage = storage("local", root="./path/to/local/storage")
+    # s3_storage = storage("s3", bucket_name="my-bucket-name")
 
-    # List files in the storage.
-    print("Files in storage:")
-    for file in storage.list_files(storage_path):
+    # List files in the store.
+    print("Files in store:")
+    for file in store.list_files(storage_path):
         print(f"> {file}")
 
-    # Read an existing file in the storage.
-    file_path = "choo/*.blip"
+    # Read an existing file in the store.
+    file_path = "foo/*.bar"
     try:
-        storage.delete_file(file_path)
+        store.delete_file(file_path)
     except FileNotFoundError as e:
         pass
 
-    # List files in the storage.
+    # List files in the store.
     print("\n\n*UPDATED* Files in storage:")
-    for file in storage.list_files(storage_path):
+    for file in store.list_files(storage_path):
         print(f"> {file}")

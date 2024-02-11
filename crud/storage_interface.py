@@ -4,7 +4,7 @@ from typing import List
 from typeguard import typechecked
 
 
-class Storage(ABC):
+class StorageInterface(ABC):
     @abstractmethod
     @typechecked
     def list_files(self, directory: str, pattern: str = "*.*") -> List[str]:
