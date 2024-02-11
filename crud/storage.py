@@ -16,6 +16,9 @@ class Storage(ABC):
             directory (Path): The destination directory path to list files from.
             pattern (Path, optional): The pattern to match files against. Defaults to "*.*".
 
+        Raises:
+            FileNotFoundError: If the directory does not exist.
+
         Returns:
             List[str]: List of file paths.
         """
@@ -30,6 +33,24 @@ class Storage(ABC):
         Args:
             data (str): File data to upload.
             path (Path): Destination path for the file.
+
+        Raises:
+            FileExistsError: If the file already exists.
+        """
+        pass
+
+    @abstractmethod
+    @typechecked
+    def update_file(self, data: str, path: Path):
+        """
+        Update the contents of an existing file.
+
+        Args:
+            data (str): New file data to upload.
+            path (Path): Destination path of the file to update.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
         """
         pass
 
@@ -42,6 +63,9 @@ class Storage(ABC):
         Args:
             path (Path): Destination path of the file to download.
 
+        Raises:
+            FileNotFoundError: If the file does not exist.
+
         Returns:
             str: File data.
         """
@@ -52,6 +76,9 @@ class Storage(ABC):
     def delete_file(self, path: Path):
         """
         Delete a file from the storage.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
 
         Args:
             path (Path): Destination path of the file to delete.
