@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from crud import storage
+from crud import storage, StorageTypes
 
 
 if __name__ == "__main__":
@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # Create a local storage instance.
     store = storage("local", root="./output")
-    # local_storage = storage("local", root="./path/to/local/storage")
-    # s3_storage = storage("s3", bucket_name="my-bucket-name")
+    # local_storage = storage(StorageTypes.LOCAL, root="./path/to/local/storage")
+    # s3_storage = storage(StorageTypes.S3, bucket_name="my-bucket-name")
 
     # List files in the store.
     print("Files in store:")
