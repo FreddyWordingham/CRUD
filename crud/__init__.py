@@ -6,7 +6,12 @@ from .local_storage import LocalStorage
 from .s3_storage import S3Storage
 
 
-def storage(type: str, **kwargs) -> Union[LocalStorage, S3Storage]:
+class StorageTypes:
+    LOCAL = "local"
+    S3 = "s3"
+
+
+def storage(type: StorageTypes, **kwargs) -> Union[LocalStorage, S3Storage]:
     """
     Factory function to get the specified storage type instance.
 
@@ -21,14 +26,15 @@ def storage(type: str, **kwargs) -> Union[LocalStorage, S3Storage]:
         ValueError: If an unknown storage type is requested.
     """
 
-    if type == "local":
-        return LocalStorage(**kwargs)
-    elif type == "s3":
-        return S3Storage(**kwargs)
-    else:
-        raise ValueError(f"Unknown storage type: {type}")
+    match type:
+        case StorageTypes.LOCAL:
+            return LocalStorage(**kwargs)
+        case StorageTypes.S3:
+            return S3Storage(**kwargs)
+        case _:
+            raise ValueError(f"Unknown storage type: {type}")
 
 
 # Example usage:
-# local_storage = storage("local", root="./path/to/local/storage")
-# s3_storage = storage("s3", bucket_name="my-bucket-name")
+# store = storage("local", root="./output")
+# store = storage("s3", bucket_name="my-bucket-name")
