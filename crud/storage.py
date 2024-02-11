@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import List
 
 from typeguard import typechecked
@@ -8,13 +7,13 @@ from typeguard import typechecked
 class Storage(ABC):
     @abstractmethod
     @typechecked
-    def list_files(self, directory: Path, pattern: str = "*.*") -> List[str]:
+    def list_files(self, directory: str, pattern: str = "*.*") -> List[str]:
         """
         List all files in a directory that match a pattern.
 
         Args:
-            directory (Path): The destination directory path to list files from.
-            pattern (Path, optional): The pattern to match files against. Defaults to "*.*".
+            directory (str): The destination directory path to list files from.
+            pattern (str, optional): The pattern to match files against. Defaults to "*.*".
 
         Raises:
             FileNotFoundError: If the directory does not exist.
@@ -26,13 +25,13 @@ class Storage(ABC):
 
     @abstractmethod
     @typechecked
-    def create_file(self, data: str, path: Path):
+    def create_file(self, data: str, path: str):
         """
         Add a file to the storage.
 
         Args:
             data (str): File data to upload.
-            path (Path): Destination path for the file.
+            path (str): Destination path for the file.
 
         Raises:
             FileExistsError: If the file already exists.
@@ -41,13 +40,13 @@ class Storage(ABC):
 
     @abstractmethod
     @typechecked
-    def update_file(self, data: str, path: Path):
+    def update_file(self, data: str, path: str):
         """
         Update the contents of an existing file.
 
         Args:
             data (str): New file data to upload.
-            path (Path): Destination path of the file to update.
+            path (str): Destination path of the file to update.
 
         Raises:
             FileNotFoundError: If the file does not exist.
@@ -56,12 +55,12 @@ class Storage(ABC):
 
     @abstractmethod
     @typechecked
-    def read_file(self, destination_file_path: Path) -> str:
+    def read_file(self, path: str) -> str:
         """
         Read a file from the storage.
 
         Args:
-            path (Path): Destination path of the file to download.
+            path (str): Destination path of the file to read.
 
         Raises:
             FileNotFoundError: If the file does not exist.
@@ -73,14 +72,16 @@ class Storage(ABC):
 
     @abstractmethod
     @typechecked
-    def delete_file(self, path: Path):
+    def delete_file(self, directory: str, pattern: str = "*"):
         """
-        Delete a file from the storage.
-
-        Raises:
-            FileNotFoundError: If the file does not exist.
+        Recursively delete files or directories matching the given pattern throughout
+        the storage.
 
         Args:
-            path (Path): Destination path of the file to delete.
+            directory (str): The directory to start the recursive deletion from.
+            pattern (str): The glob pattern to match files and directories against.
+
+        Raises:
+            FileNotFoundError: If no matching files or directories are found.
         """
         pass
