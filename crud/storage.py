@@ -9,56 +9,51 @@ class Storage(ABC):
     @abstractmethod
     @typechecked
     def list_files(self, directory: Path, pattern: str = "*.*") -> List[str]:
-        """List all files in a directory that match a pattern.
+        """
+        List all files in a directory that match a pattern.
 
         Args:
-            directory (Path): The directory path, relative to the root of the storage, to list files from.
+            directory (Path): The destination directory path to list files from.
             pattern (Path, optional): The pattern to match files against. Defaults to "*.*".
 
         Returns:
-            List[]: A list of file paths.
+            List[str]: List of file paths.
         """
         pass
 
     @abstractmethod
     @typechecked
-    def upload(self, file_path: Path, destination: Path) -> bool:
-        """Upload a file to the storage.
+    def create_file(self, data: str, path: Path):
+        """
+        Add a file to the storage.
 
         Args:
-            file_path (Path): Local file path to the file to upload.
-            destination (Path): Destination path for the file.
-
-        Returns:
-            bool: True if the file was uploaded successfully, False otherwise.
+            data (str): File data to upload.
+            path (Path): Destination path for the file.
         """
         pass
 
     @abstractmethod
     @typechecked
-    def download(self, file_path: Path, destination: Path) -> bool:
-        """Download a file from the storage.
+    def read_file(self, destination_file_path: Path) -> str:
+        """
+        Read a file from the storage.
 
         Args:
-            file_path (Path): Path to the file to download.
-            destination (Path): Local destination path for the file.
+            path (Path): Destination path of the file to download.
 
         Returns:
-            bool: True if the file was downloaded successfully, False otherwise.
+            str: File data.
         """
-
         pass
 
     @abstractmethod
     @typechecked
-    def delete(self, file_path: Path) -> bool:
-        """Delete a file from the storage.
+    def delete_file(self, path: Path):
+        """
+        Delete a file from the storage.
 
         Args:
-            file_path (Path): Path to the file to delete.
-
-        Returns:
-            bool: True if the file was deleted successfully, False otherwise.
+            path (Path): Destination path of the file to delete.
         """
-
         pass
