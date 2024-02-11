@@ -26,7 +26,7 @@ class LocalStorage(Storage):
         self.root = Path(root)
 
     @typechecked
-    def list_files(self, directory: str, pattern: str = "*.*") -> List[str]:
+    def list_files(self, directory: str, pattern: str = "*") -> List[str]:
         """
         List all files in a directory that match a pattern.
 
