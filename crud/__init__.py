@@ -3,6 +3,7 @@ from typeguard import typechecked
 
 from .base import Storage
 from .local_storage import LocalStorageConfig, LocalStorage
+from .s3_storage import S3StorageConfig, S3Storage
 
 
 @typechecked

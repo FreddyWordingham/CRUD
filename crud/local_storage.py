@@ -75,7 +75,6 @@ class LocalStorage(Storage):
         deleted_files = False
 
         for file_path in self.list_files(path, pattern, recursive):
-            print(f"Deleting: {file_path}")
             full_path = Path(self.root, file_path)
             os.remove(full_path)
             deleted_files = True
@@ -89,19 +88,9 @@ class LocalStorage(Storage):
                 if dirpath == self.root:
                     # Prevent attempting to remove the root directory
                     break
-                try:
-                    dirpath.rmdir()
-                    print(f"Removed empty directory: {dirpath}")
-                except OSError as e:
-                    # Directory not empty or other error
-                    print(f"Cannot remove directory {dirpath}: {e}")
+                dirpath.rmdir()
         elif deleted_files:
             # Attempt to remove the parent directory if not recursive and it's empty, avoiding the root
             parent_dir = Path(self.root, path).parent
             if parent_dir != self.root:
-                try:
-                    parent_dir.rmdir()
-                    print(f"Removed empty directory: {parent_dir}")
-                except OSError as e:
-                    # Directory not empty or other error
-                    print(f"Cannot remove directory {parent_dir}: {e}")
+                parent_dir.rmdir()
