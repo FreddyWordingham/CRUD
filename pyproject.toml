@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "crud"
 version = "0.0.0"
-description = "A simple, extendable CRUD interface that abstracts the backend storage system."
+description = "A simple, extendable CRUD interface that abstracts the storage system."
 authors = ["Freddy Wordingham <freddy@digilab.co.uk>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
 typeguard = "^4.1.5"
-boto3 = "^1.34.39"
+pydantic-settings = "^2.2.1"
 
 [build-system]
 requires = ["poetry-core"]

@@ -5,7 +5,7 @@ import fnmatch
 
 from typeguard import typechecked
 
-from .storage_interface import StorageInterface
+from .base import StorageInterface
 from pathlib import PurePosixPath
 
 

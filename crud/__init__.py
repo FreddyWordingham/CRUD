@@ -1,40 +1,20 @@
-from typing import Union
+from pydantic import BaseModel
+from typeguard import typechecked
 
-from .storage_interface import StorageInterface
-
-from .local_storage import LocalStorage
-from .s3_storage import S3Storage
-
-
-class StorageTypes:
-    LOCAL = "local"
-    S3 = "s3"
+from .base import Storage
+from .local_storage import LocalStorageConfig, LocalStorage
 
 
-def storage(type: StorageTypes, **kwargs) -> Union[LocalStorage, S3Storage]:
-    """
-    Factory function to get the specified storage type instance.
+@typechecked
+def storage_factory(config: BaseModel) -> Storage:
+    # Derive storage class name by removing "Config" suffix and access the storage class.
+    storage_class_name = config.__class__.__name__.replace(
+        "Config", "")
+    storage_class = globals().get(storage_class_name)
 
-    Args:
-        type (str): The type of storage to initialize ("local" or "s3").
-        **kwargs: Additional arguments required to initialize the storage instance.
-
-    Returns:
-        Union[LocalStorage, S3Storage]: An instance of the requested storage type.
-
-    Raises:
-        ValueError: If an unknown storage type is requested.
-    """
-
-    match type:
-        case StorageTypes.LOCAL:
-            return LocalStorage(**kwargs)
-        case StorageTypes.S3:
-            return S3Storage(**kwargs)
-        case _:
-            raise ValueError(f"Unknown storage type: {type}")
-
-
-# Example usage:
-# store = storage("local", root="./output")
-# store = storage("s3", bucket_name="my-bucket-name")
+    if storage_class is not None:
+        # Initialise and return the storage instance using the config object.
+        return storage_class(config)
+    else:
+        raise ValueError(
+            f"No storage class found for {config.__class__.__name__}")

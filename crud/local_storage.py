@@ -1,157 +1,107 @@
 from pathlib import Path
 from typing import List
-import shutil
+import glob
+import os
 
+from pydantic import BaseModel
 from typeguard import typechecked
 
-from .storage_interface import StorageInterface
+from .base import Storage
 
 
-class LocalStorage(StorageInterface):
+class LocalStorageConfig(BaseModel):
+    root_directory: Path
+
+
+class LocalStorage(Storage):
     @typechecked
-    def __init__(self, root: str):
-        """
-        Create a new LocalStorage instance.
-
-        Args:
-            root (str): The root directory path for the storage.
-
-        Raises:
-            FileNotFoundError: If the root directory does not already exist.
-        """
-
-        if not Path(root).exists():
-            raise FileNotFoundError(f"Root directory does not exist: {root}")
-
-        self.root = Path(root)
+    def __init__(self, config: LocalStorageConfig):
+        self.root = config.root_directory
+        if not self.root.exists():
+            self.root.mkdir(parents=True, exist_ok=True)
 
     @typechecked
-    def list_files(self, directory: str, pattern: str = "*") -> List[str]:
-        """
-        List all files in a directory that match a pattern.
+    def list_files(self, path: Path = Path("."), pattern: str = "*", recursive: bool = False) -> List[Path]:
+        # Ensure the path is treated as relative to the root, even if an absolute path is mistakenly provided
+        if path.is_absolute():
+            path = path.relative_to(self.root)
 
-        Args:
-            directory (str): The destination directory path to list files from.
-            pattern (str, optional): The pattern to match files against. Defaults to "*.*".
+        search_path = Path(self.root, path)
 
-        Raises:
-            FileNotFoundError: If the directory does not exist.
+        if search_path.is_file():
+            return [path]
 
-        Returns:
-            List[str]: List of file paths.
-        """
+        search_pattern = str(
+            search_path / "**" / pattern) if recursive else str(search_path / pattern)
 
-        absolute_directory = self.root / directory
-
-        if not absolute_directory.exists():
-            raise FileNotFoundError(
-                f"Directory does not exist: {absolute_directory}")
-
-        return [str(file.relative_to(self.root)) for file in absolute_directory.rglob(pattern)]
+        return [Path(p).relative_to(self.root) for p in glob.glob(search_pattern, recursive=recursive) if Path(p).is_file()]
 
     @typechecked
-    def create_file(self, data: str, path: str):
-        """
-        Add a file to the storage.
+    def create_file(self, path: Path, data: str):
+        full_path = Path(self.root, path)
 
-        Args:
-            data (str): File data to upload.
-            path (str): Destination path for the file.
+        # Check that the file does not already exist.
+        if full_path.exists():
+            raise FileExistsError(f"File already exists: {path}")
 
-        Raises:
-            FileExistsError: If the file already exists.
-        """
-
-        absolute_path = self.root / path
-
-        if absolute_path.exists():
-            raise FileExistsError(f"File already exists: {absolute_path}")
-
-        # Ensure parent directory exists
-        absolute_path.parent.mkdir(parents=True, exist_ok=True)
-        absolute_path.write_text(data)
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(full_path, "w") as file:
+            file.write(data)
 
     @typechecked
-    def update_file(self, data: str, path: str):
-        """
-        Update the contents of an existing file.
+    def update_file(self, path: Path, data: str):
+        full_path = Path(self.root, path)
 
-        Args:
-            data (str): New file data to upload.
-            path (str): Destination path of the file to update.
+        # Check that the file exists.
+        if not full_path.exists():
+            raise FileNotFoundError(f"File not found: {path}")
 
-        Raises:
-            FileNotFoundError: If the file does not exist.
-        """
-
-        absolute_path = self.root / path
-
-        if not absolute_path.exists():
-            raise FileNotFoundError(f"File does not exist: {absolute_path}")
-
-        backup_path = absolute_path.with_suffix(
-            absolute_path.suffix + ".backup")
-        absolute_path.rename(backup_path)
-
-        try:
-            absolute_path.write_text(data)
-        except Exception as err:
-            # Restore from backup if update fails
-            backup_path.rename(absolute_path)
-            raise err
-
-        backup_path.unlink()
+        with open(full_path, "w") as file:
+            file.write(data)
 
     @typechecked
-    def read_file(self, path: str) -> str:
-        """
-        Read a file from the storage.
+    def read_file(self, path: Path) -> str:
+        full_path = Path(self.root, path)
 
-        Args:
-            path (str): Destination path of the file to read.
+        # Check that the file exists.
+        if not full_path.exists():
+            raise FileNotFoundError(f"File not found: {path}")
 
-        Raises:
-            FileNotFoundError: If the file does not exist.
-
-        Returns:
-            str: File data.
-        """
-
-        absolute_path = self.root / path
-
-        if not absolute_path.exists():
-            raise FileNotFoundError(f"File does not exist: {absolute_path}")
-
-        return absolute_path.read_text()
+        with open(full_path, "r") as file:
+            return file.read()
 
     @typechecked
-    def delete_file(self, directory: str, pattern: str = "*"):
-        """
-        Recursively delete files or directories matching the given pattern starting from
-        the specified directory within the storage.
+    def delete_file(self, path: Path, pattern: str = "*", recursive: bool = False):
+        deleted_files = False
 
-        Args:
-            directory (str): The directory to start the recursive deletion from.
-            pattern (str): The glob pattern to match files and directories against.
+        for file_path in self.list_files(path, pattern, recursive):
+            print(f"Deleting: {file_path}")
+            full_path = Path(self.root, file_path)
+            os.remove(full_path)
+            deleted_files = True
 
-        Raises:
-            FileNotFoundError: If the specified directory does not exist.
-            FileNotFoundError: If no matching files or directories are found within the specified directory.
-        """
-
-        starting_directory = self.root / directory
-
-        if not starting_directory.exists():
-            raise FileNotFoundError(
-                f"Starting directory does not exist: {starting_directory}")
-
-        found_files_or_dirs = list(starting_directory.rglob(pattern))
-        if not found_files_or_dirs:
-            raise FileNotFoundError(
-                f"No file or directory matches the pattern: {pattern} in directory: {directory}")
-
-        for path in found_files_or_dirs:
-            if path.is_dir():
-                shutil.rmtree(path)
-            else:
-                path.unlink()
+        # After deleting files, check and remove any empty directories
+        if deleted_files and recursive:
+            # Walking through the directory tree from the bottom up to safely remove any empty directories
+            for dirpath, dirnames, filenames in os.walk(Path(self.root, path), topdown=False):
+                # Convert dirpath to Path object for consistency with Pathlib usage
+                dirpath = Path(dirpath)
+                if dirpath == self.root:
+                    # Prevent attempting to remove the root directory
+                    break
+                try:
+                    dirpath.rmdir()
+                    print(f"Removed empty directory: {dirpath}")
+                except OSError as e:
+                    # Directory not empty or other error
+                    print(f"Cannot remove directory {dirpath}: {e}")
+        elif deleted_files:
+            # Attempt to remove the parent directory if not recursive and it's empty, avoiding the root
+            parent_dir = Path(self.root, path).parent
+            if parent_dir != self.root:
+                try:
+                    parent_dir.rmdir()
+                    print(f"Removed empty directory: {parent_dir}")
+                except OSError as e:
+                    # Directory not empty or other error
+                    print(f"Cannot remove directory {parent_dir}: {e}")
