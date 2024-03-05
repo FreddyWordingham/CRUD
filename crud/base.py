@@ -8,7 +8,7 @@ from typeguard import typechecked
 class Storage(ABC):
     @abstractmethod
     @typechecked
-    def list_files(self, path: Path = Path("."), pattern: str = "*", recursive: bool = False) -> List[Path]:
+    def list_files(self, pattern: str = "*") -> List[Path]:
         pass
 
     @abstractmethod
@@ -28,5 +28,5 @@ class Storage(ABC):
 
     @abstractmethod
     @typechecked
-    def delete_file(self, path: Path, pattern: str = "*"):
+    def delete_file(self, path: Path, pattern: str):
         pass

@@ -22,21 +22,10 @@ class LocalStorage(Storage):
             self.root.mkdir(parents=True, exist_ok=True)
 
     @typechecked
-    def list_files(self, path: Path = Path("."), pattern: str = "*", recursive: bool = False) -> List[Path]:
+    def list_files(self, pattern: str = "*") -> List[Path]:
+        """List all files matching the given pattern."""
 
-        # Ensure the path is treated as relative to the root, even if an absolute path is mistakenly provided
-        if path.is_absolute():
-            path = path.relative_to(self.root)
-
-        search_path = Path(self.root, path)
-
-        if search_path.is_file():
-            return [path]
-
-        search_pattern = str(
-            search_path / "**" / pattern) if recursive else str(search_path / pattern)
-
-        return [Path(p).relative_to(self.root) for p in glob.glob(search_pattern, recursive=recursive) if Path(p).is_file()]
+        return [Path(file) for file in glob.glob(str(Path(self.root, pattern)))]
 
     @typechecked
     def create_file(self, path: Path, data: Union[str, bytes, bytearray]):
@@ -83,8 +72,8 @@ class LocalStorage(Storage):
             return file.read()
 
     @typechecked
-    def delete_file(self, path: Path, pattern: str = "*", recursive: bool = False):
+    def delete_file(self, pattern: str):
 
-        for file_path in self.list_files(path, pattern, recursive):
+        for file_path in self.list_files(pattern):
             full_path = Path(self.root, file_path)
             os.remove(full_path)
