@@ -34,6 +34,11 @@ class S3Storage(Storage):
         obj.put(Body=data)
 
     def update_file(self, path: Path, data: str):
+        # Check if file exists
+        obj = self.s3.Object(self.bucket_name, str(path))
+        if not obj.load():
+            raise FileNotFoundError(f"File not found: {path}")
+
         # S3's put method will overwrite the file if it exists
         self.create_file(path, data)
 
